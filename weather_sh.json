@@ -1,0 +1,7 @@
+{
+    "apiKey": "YOUR_API_KEY",
+    "cityId": "",
+    "degreeUnit": "c",
+    "colors": true,
+    "icons": true
+}
