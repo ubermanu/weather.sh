@@ -171,15 +171,15 @@ while true; do
                 icons[$i]=$(echo $data | jq -r .list[$i].weather[] | jq -r .icon | tr '\n' ' ')
                 iconval=${icons[$i]%?}
                 case $iconval in
-                    01*) icon[$i]="☀️";;
-                    02*) icon[$i]="🌤";;
-                    03*) icon[$i]="🌥";;
-                    04*) icon[$i]="☁";;
-                    09*) icon[$i]="🌧";;
-                    10*) icon[$i]="🌦";;
-                    11*) icon[$i]="🌩";;
-                    13*) icon[$i]="🌨";;
-                    50*) icon[$i]="🌫";;
+                    01*) icon[$i]="";;
+                    02*) icon[$i]="";;
+                    03*) icon[$i]="";;
+                    04*) icon[$i]="";;
+                    09*) icon[$i]="";;
+                    10*) icon[$i]="";;
+                    11*) icon[$i]="";;
+                    13*) icon[$i]="流";;
+                    50*) icon[$i]="";;
                 esac
             else
                 icon[$i]=""
