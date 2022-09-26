@@ -5,7 +5,7 @@ to the terminal, Openbox, or HTML
 
 Additionally, a way to put that information onto an image (see the `weather_image` subdirectory).
 
-![Output example](https://raw.githubusercontent.com/uriel1998/weather.sh/master/example_output.png "Example output")
+![Output example](screenshots/example_output.png "Example output")
 
 ## Contents
  1. [About](#1-about)
