@@ -6,8 +6,6 @@ ifeq ($(PREFIX),)
 	PREFIX := /usr/local
 endif
 
-all: install
-
 install:
 	$(INSTALL) -d $(DESTDIR)$(PREFIX)$(BINDIR)
 	$(INSTALL) -m755 weather.sh $(DESTDIR)$(PREFIX)$(BINDIR)/weather.sh
