@@ -1,0 +1,11 @@
+{
+    "name": "weather.sh",
+    "version": "1.0.0",
+    "description": "A bash script to get the weather and forecast from OpenWeatherMap",
+    "global": "1",
+    "install": "install -b weather.sh ${PREFIX:-/usr/local}/bin/weather.sh",
+    "scripts": [
+        "weather.sh",
+        "forecast.sh"
+    ]
+}
