@@ -281,46 +281,7 @@ while true; do
             fi
             i=$((i + 1))
         done
-        fi
-        if [ "$OpenBox" = "true" ]; then
-            echo '<openbox_pipe_menu>'
-            echo '<separator label="Forecast" />'
-            printf '<item label="Forecast for %s as of %s" />\n' "$Station" "$AsOf"
-            let i=0
-            while [ $i -lt 40 ]; do
-                CastDate=$(date +"%s" -d @${NixDate[$i]})
-                if [ $CastDate -le $TomorrowDate ]; then
-                    ShortDate=$(date +"%m/%d@%R" -d @${NixDate[$i]})
-                    printf '<item label="%-12s %-2s%-20s %-15s %-14s %-14s %-14s/>\n' "$ShortDate:" "${icon[$i]} " "${LongWeather[$i]}" "Temp:${temperature[$i]}°${degreeCharacter^^}" "Wind:${WindSpeed[$i]}$windunit" "Humidity:${Humidity[$i]}%" "Cloud Cover:${CloudCover[$i]}%"
-                else
-                    CastHour=$(date +"%-H" -d @${NixDate[$i]})
-                    if [ "$CastHour" -ge "$NowHigh" ] && [ "$CastHour" -le "$NowLow" ]; then
-                        ShortDate=$(date +"%m/%d@%R" -d @${NixDate[$i]})
-                        printf '<item label="%-12s %-2s%-20s %-15s %-14s %-14s %-14s/>\n' "$ShortDate:" "${icon[$i]} " "${LongWeather[$i]}" "Temp:${temperature[$i]}°${degreeCharacter^^}" "Wind:${WindSpeed[$i]}$windunit" "Humidity:${Humidity[$i]}%" "Cloud Cover:${CloudCover[$i]}%"
-                    fi
-                fi
-                i=$((i + 1))
-            done
-            echo '</openbox_pipe_menu>'
-        fi
-        if [ "$HTML" = "true" ]; then
-            echo "Forecast for $Station as of: $AsOf  <br  />"
-            let i=0
-            while [ $i -lt 40 ]; do
-                CastDate=$(date +"%s" -d @${NixDate[$i]})
-                if [ $CastDate -le $TomorrowDate ]; then
-                    ShortDate=$(date +"%m/%d@%R" -d @${NixDate[$i]})
-                    printf "%-12s %-2s%-20s %-15s %-14s %-14s %-14s<br  />\n" "$ShortDate:" "${icon[$i]} " "${LongWeather[$i]}" "Temp:${temperature[$i]}°${degreeCharacter^^}" "Wind:${WindSpeed[$i]}$windunit" "Humidity:${Humidity[$i]}%" "Cloud Cover:${CloudCover[$i]}%"
-                else
-                    CastHour=$(date +"%-H" -d @${NixDate[$i]})
-                    if [ $CastHour -ge $NowHigh ] && [ $CastHour -le $NowLow ]; then
-                        ShortDate=$(date +"%m/%d@%R" -d @${NixDate[$i]})
-                        printf "%-12s %-2s%-20s %-15s %-14s %-14s %-14s<br  />\n" "$ShortDate:" "${icon[$i]} " "${LongWeather[$i]}" "Temp:${temperature[$i]}°${degreeCharacter^^}" "Wind:${WindSpeed[$i]}$windunit" "Humidity:${Humidity[$i]}%" "Cloud Cover:${CloudCover[$i]}%"
-                    fi
-                fi
-                i=$((i + 1))
-            done
-        fi
+    fi
     if [ $dynamicUpdates -eq 0 ]; then
         break
     fi
