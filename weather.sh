@@ -61,9 +61,9 @@ option="$1"
     -h) HTML="True"
     shift ;;
     -o) OpenBox="True"
-    shift ;;    
+    shift ;;
     -y) Conky="True"
-    shift ;;    
+    shift ;;
     -f) degreeCharacter="f"
     shift ;;
     -p) CachePath="$2"
@@ -71,7 +71,7 @@ option="$1"
     shift ;;
     -n) UseIcons="False"
     shift ;;
-    -c) 
+    -c)
         if [ -f "$HOME/.bashcolors" ];then
             source "$HOME/.bashcolors"
             colors="True"
@@ -80,7 +80,7 @@ option="$1"
     esac
 done
 
-if [ -z "${CachePath}" ];then 
+if [ -z "${CachePath}" ];then
     dataPath="/tmp/wth-$defaultLocation.json"
 else
     dataPath="${CachePath}/wth-$defaultLocation.json"
@@ -122,7 +122,7 @@ while true; do
         fi
         echo $data > $dataPath
     else
-        if [ "$Conky" != "True" ];then 
+        if [ "$Conky" != "True" ];then
             echo "Cache age: $(($(date +%s)-$lastfileupdate)) seconds."
         fi
     fi
@@ -165,13 +165,13 @@ while true; do
         ####################################################################
         # Temperature
         ####################################################################
-        tempinc=$(echo $data | jq -r .main.temp| awk '{$1=$1};1' )   
+        tempinc=$(echo $data | jq -r .main.temp| awk '{$1=$1};1' )
         RawTemp=$(echo $data | jq -r .main.temp| awk '{$1=$1};1' )
         temperature=$tempinc
         if  [ "$degreeCharacter" = "f" ]; then
             temperature=$(echo "scale=2; 32+1.8*$tempinc" | bc| awk '{$1=$1};1' )
         fi
-        
+
         ####################################################################
         # Parse Wind Info
         ####################################################################
@@ -187,7 +187,7 @@ while true; do
         RawWindSpeed=$(echo $data | jq .wind.speed)
         WindSpeed=$(echo $data | jq .wind.speed)
         WindGusts=$(echo $data | jq .wind.gust)
-        
+
         #Conversion
         if  [ "$degreeCharacter" = "f" ]; then
             WindSpeed=$(echo "scale=2; $WindSpeed*0.6213712" | bc | xargs printf "%.2f"| awk '{$1=$1};1' )
@@ -196,7 +196,7 @@ while true; do
         else
             WindGusts=$(echo "scale=2; $WindGusts*1" | bc| awk '{$1=$1};1' )
             windunit="kph"
-        fi        
+        fi
 
         Humidity=$(echo $data | jq .main.humidity| awk '{$1=$1};1' )
         CloudCover=$(echo $data | jq .clouds.all| awk '{$1=$1};1' )
@@ -249,7 +249,7 @@ while true; do
             pressureunit="hPa"
         fi
     fi
-    AsOf=$(date +"%Y-%m-%d %R" -d @$lastfileupdate) 
+    AsOf=$(date +"%Y-%m-%d %R" -d @$lastfileupdate)
     if [ "$OpenBox" = "False" ];then
         if [ "$HTML" = "False" ];then
             if [ "$Conky" = "False" ];then
@@ -260,7 +260,7 @@ while true; do
     if [ "$Terminal" = "True" ];then
         if [ "$colors" = "True" ]; then
             echo "Station: $Station, $Country $Lat / $Long"
-            echo "As Of: ${YELLOW}$AsOf ${RESTORE}"  
+            echo "As Of: ${YELLOW}$AsOf ${RESTORE}"
             echo "Right Now: ${CYAN}$icon $LongWeather${RESTORE}"
             #echo "$icon $ShortWeather"
             echo "Temp: ${CYAN}$temperature°${degreeCharacter^^}${RESTORE}"
@@ -274,10 +274,10 @@ while true; do
                 echo "Wind: ${MAGENTA}$WindSpeed$windunit${RESTORE} Gusts: ${MAGENTA}$WindGusts$windunit${RESTORE}"
             fi
             echo "Humidity: ${GREEN}$Humidity%${RESTORE}"
-            echo "Cloud Cover: ${GREEN}$CloudCover%${RESTORE}"        
+            echo "Cloud Cover: ${GREEN}$CloudCover%${RESTORE}"
         else
             echo "Station: $Station, $Country $Lat / $Long"
-            echo "As Of: $AsOf "  
+            echo "As Of: $AsOf "
             echo "Right Now: $icon $LongWeather"
             #echo "$icon $ShortWeather"
             echo "Temp: $temperature°${degreeCharacter^^}"
@@ -306,36 +306,36 @@ while true; do
         echo "$bob"
     fi
     if [ "$OpenBox" = "True" ]; then
-        echo '<openbox_pipe_menu>' 
-        echo '<separator label="Weather" />' 
-        printf '<item label="Station: %s, %s" />\n' "$Station" "$Country"  
-        printf '<item label="As of %s" />\n' "$AsOf" 
-        printf '<item label="Now: %s %s" />\n' "$icon" "$LongWeather" 
-        printf '<item label="Temp: %s%s" />\n' "$temperature" "°${degreeCharacter^^}" 
+        echo '<openbox_pipe_menu>'
+        echo '<separator label="Weather" />'
+        printf '<item label="Station: %s, %s" />\n' "$Station" "$Country"
+        printf '<item label="As of %s" />\n' "$AsOf"
+        printf '<item label="Now: %s %s" />\n' "$icon" "$LongWeather"
+        printf '<item label="Temp: %s%s" />\n' "$temperature" "°${degreeCharacter^^}"
         if [ "$FeelsLike" = "1" ];then
-            printf '<item label="Feels Like: %s%s" />\n' "$FeelsLikeTemp" "°${degreeCharacter^^}" 
+            printf '<item label="Feels Like: %s%s" />\n' "$FeelsLikeTemp" "°${degreeCharacter^^}"
         fi
-        printf '<item label="Pressure: %s%s" />\n' "$pressure" "$pressureunit" 
-        printf '<item label="Wind: %s%s Gusts: %s%s" />\n'  "$WindSpeed" "$windunit" "$WindGusts" "$windunit" 
-        printf '<item label="Humidity: %s%%" />\n' "$Humidity" 
-        printf '<item label="Cloud Cover: %s%%" />\n' "$CloudCover" 
-        echo '</openbox_pipe_menu>' 
+        printf '<item label="Pressure: %s%s" />\n' "$pressure" "$pressureunit"
+        printf '<item label="Wind: %s%s Gusts: %s%s" />\n'  "$WindSpeed" "$windunit" "$WindGusts" "$windunit"
+        printf '<item label="Humidity: %s%%" />\n' "$Humidity"
+        printf '<item label="Cloud Cover: %s%%" />\n' "$CloudCover"
+        echo '</openbox_pipe_menu>'
     fi
     if [ "$HTML" = "True" ];then
-        echo "Station: $Station, $Country $Lat / $Long <br  />"  
-        echo "As Of: $AsOf <br  />"  
-        echo "Current Conditions: $icon $LongWeather <br  />" 
-        #echo "$icon $ShortWeather" 
-        echo "Temp: $temperature °${degreeCharacter^^} <br  />" 
+        echo "Station: $Station, $Country $Lat / $Long <br  />"
+        echo "As Of: $AsOf <br  />"
+        echo "Current Conditions: $icon $LongWeather <br  />"
+        #echo "$icon $ShortWeather"
+        echo "Temp: $temperature °${degreeCharacter^^} <br  />"
         if [ "$FeelsLike" = "1" ];then
             echo "Feels Like: $FeelsLikeTemp °${degreeCharacter^^} <br  />"
         fi
-        echo "Pressure: $pressure $pressureunit <br  />" 
-        echo -e \\u$winddir "$WindSpeed$windunit Gusts: $WindGusts$windunit <br  />" 
-        echo "Humidity: $Humidity% <br  />" 
-        echo "Cloud Cover: $CloudCover% <br  />"     
+        echo "Pressure: $pressure $pressureunit <br  />"
+        echo -e \\u$winddir "$WindSpeed$windunit Gusts: $WindGusts$windunit <br  />"
+        echo "Humidity: $Humidity% <br  />"
+        echo "Cloud Cover: $CloudCover% <br  />"
     fi
     if [ $dynamicUpdates -eq 0 ];then
         break
-    fi    
+    fi
 done

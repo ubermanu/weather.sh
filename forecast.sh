@@ -21,7 +21,7 @@ UseIcons="True"
 colors="False"
 
 ########################################################################
-# Reading in rc 
+# Reading in rc
 ########################################################################
 ConfigFile="$HOME/.config/weather_sh.rc"
 
@@ -71,22 +71,22 @@ option="$1"
     -h) HTML="True"
     shift ;;
     -o) OpenBox="True"
-    shift ;;    
+    shift ;;
     -y) Conky="True"
-    shift ;;        
+    shift ;;
     -f) degreeCharacter="f"
     shift ;;
     -n) UseIcons="False"
-    shift ;;    
+    shift ;;
     -p) CachePath="$2"
     shift
-    shift ;;    
-    -c) 
+    shift ;;
+    -c)
         if [ -f "$HOME/.bashcolors" ];then
             source "$HOME/.bashcolors"
             colors="True"
         fi
-    shift ;;    
+    shift ;;
     esac
 done
 
@@ -106,7 +106,7 @@ esac
 # Do we need a new datafile? If so, get it.
 ########################################################################
 
-if [ -z "${CachePath}" ];then 
+if [ -z "${CachePath}" ];then
     dataPath="/tmp/fore-$defaultLocation.json"
 else
     dataPath="${CachePath}/fore-$defaultLocation.json"
@@ -144,14 +144,14 @@ while true; do
         fi
         echo $data > $dataPath
     else
-        if [ "$Conky" != "True" ];then 
+        if [ "$Conky" != "True" ];then
             echo "Cache age: $(($(date +%s)-$lastfileupdate)) seconds."
         fi
     fi
 
     if [ $(($(date +%s)-$lastUpdateTime)) -ge 600 ]; then
         lastUpdateTime=$(date +%s)
-        
+
 
         ########################################################################
         # Location Data
@@ -162,8 +162,8 @@ while true; do
         #Country=$(echo $data | jq -r .sys.country)
         NumEntries=$(echo $data |jq -r .cnt)
         let i=0
-       
-        while [ $i -lt $NumEntries ]; do 
+
+        while [ $i -lt $NumEntries ]; do
             # Get the date...unix format
             NixDate[$i]=$(echo $data | jq -r  .list[$i].dt  | tr '\n' ' ')
             ####################################################################
@@ -202,7 +202,7 @@ while true; do
                 windunit="mph"
             else
                 windunit="kph"
-            fi        
+            fi
 
             ####################################################################
             # Temperature
@@ -217,7 +217,7 @@ while true; do
     fi
 
 
-    AsOf=$(date +"%Y-%m-%d %R" -d @$lastfileupdate) 
+    AsOf=$(date +"%Y-%m-%d %R" -d @$lastfileupdate)
     TomorrowDate=$(date -d '+1 day' +"%s")
     NowHour=$(date +"%-H")
     NowLow=$((NowHour + 1))
@@ -233,36 +233,36 @@ while true; do
         if [ "$colors" = "True" ]; then
             let i=0
             bob=""
-            while [ $i -lt 5 ]; do 
+            while [ $i -lt 5 ]; do
                 CastDate=$(date +"%s" -d @${NixDate[$i]})
                 if [ $CastDate -le $TomorrowDate ]; then
                     ShortDate=$(date +"%R" -d @${NixDate[$i]})
                     bob=$(printf "%s %-4s%-2s %-4s |" "$bob" "$ShortDate:" "${ShortWeather[$i]}" "${temperature[$i]}°${degreeCharacter^^}")
-                fi            
-                i=$((i + 1))        
+                fi
+                i=$((i + 1))
             done
         else
             let i=0
             bob=""
-            while [ $i -lt 5 ]; do 
+            while [ $i -lt 5 ]; do
                 CastDate=$(date +"%s" -d @${NixDate[$i]})
                 if [ $CastDate -le $TomorrowDate ]; then
                     ShortDate=$(date +"%R" -d @${NixDate[$i]})
                     bob=$(printf "%s %-5s %-6s %-4s |" "$bob" "$ShortDate:" "${ShortWeather[$i]}" "${temperature[$i]}°${degreeCharacter^^}")
-                fi            
+                fi
                 i=$((i + 1))
             done
         fi
 
         #bob=$(echo "$icon $ShortWeather $temperature°${degreeCharacter^^}")
-        #bob 
+        #bob
         echo "$bob"
-    fi    
+    fi
     if [ "$Terminal" = "True" ];then
         if [ "$colors" = "True" ]; then
             echo "Forecast for $Station as of: ${YELLOW}$AsOf${RESTORE} "
         else
-            echo "Forecast for $Station as of: $AsOf "  
+            echo "Forecast for $Station as of: $AsOf "
         fi
         let i=0
         while [ $i -lt 40 ]; do
@@ -284,35 +284,35 @@ while true; do
                         printf "%-12s %-2s%-20s %-15s %-14s %-14s %-14s\n" "$ShortDate:" "${icon[$i]} " "${LongWeather[$i]}" "Temp:${temperature[$i]}°${degreeCharacter^^}" "Wind:${WindSpeed[$i]}$windunit" "Humidity:${Humidity[$i]}%" "Cloud Cover:${CloudCover[$i]}%"
                     fi
                 fi
-            fi            
+            fi
             i=$((i + 1))
         done
         fi
         if [ "$OpenBox" = "True" ]; then
-            echo '<openbox_pipe_menu>' 
-            echo '<separator label="Forecast" />' 
-            printf '<item label="Forecast for %s as of %s" />\n' "$Station" "$AsOf"  
+            echo '<openbox_pipe_menu>'
+            echo '<separator label="Forecast" />'
+            printf '<item label="Forecast for %s as of %s" />\n' "$Station" "$AsOf"
             let i=0
-            while [ $i -lt 40 ]; do 
+            while [ $i -lt 40 ]; do
                 CastDate=$(date +"%s" -d @${NixDate[$i]})
                 if [ $CastDate -le $TomorrowDate ]; then
                     ShortDate=$(date +"%m/%d@%R" -d @${NixDate[$i]})
-                    printf '<item label="%-12s %-2s%-20s %-15s %-14s %-14s %-14s/>\n' "$ShortDate:" "${icon[$i]} " "${LongWeather[$i]}" "Temp:${temperature[$i]}°${degreeCharacter^^}" "Wind:${WindSpeed[$i]}$windunit" "Humidity:${Humidity[$i]}%" "Cloud Cover:${CloudCover[$i]}%"          
+                    printf '<item label="%-12s %-2s%-20s %-15s %-14s %-14s %-14s/>\n' "$ShortDate:" "${icon[$i]} " "${LongWeather[$i]}" "Temp:${temperature[$i]}°${degreeCharacter^^}" "Wind:${WindSpeed[$i]}$windunit" "Humidity:${Humidity[$i]}%" "Cloud Cover:${CloudCover[$i]}%"
                 else
                     CastHour=$(date +"%-H" -d @${NixDate[$i]})
                     if [ "$CastHour" -ge "$NowHigh" ] && [ "$CastHour" -le "$NowLow" ]; then
                         ShortDate=$(date +"%m/%d@%R" -d @${NixDate[$i]})
-                        printf '<item label="%-12s %-2s%-20s %-15s %-14s %-14s %-14s/>\n' "$ShortDate:" "${icon[$i]} " "${LongWeather[$i]}" "Temp:${temperature[$i]}°${degreeCharacter^^}" "Wind:${WindSpeed[$i]}$windunit" "Humidity:${Humidity[$i]}%" "Cloud Cover:${CloudCover[$i]}%"          
+                        printf '<item label="%-12s %-2s%-20s %-15s %-14s %-14s %-14s/>\n' "$ShortDate:" "${icon[$i]} " "${LongWeather[$i]}" "Temp:${temperature[$i]}°${degreeCharacter^^}" "Wind:${WindSpeed[$i]}$windunit" "Humidity:${Humidity[$i]}%" "Cloud Cover:${CloudCover[$i]}%"
                     fi
                 fi
                 i=$((i + 1))
             done
-            echo '</openbox_pipe_menu>' 
+            echo '</openbox_pipe_menu>'
         fi
         if [ "$HTML" = "True" ];then
-            echo "Forecast for $Station as of: $AsOf  <br  />"  
+            echo "Forecast for $Station as of: $AsOf  <br  />"
             let i=0
-            while [ $i -lt 40 ]; do 
+            while [ $i -lt 40 ]; do
                 CastDate=$(date +"%s" -d @${NixDate[$i]})
                 if [ $CastDate -le $TomorrowDate ]; then
                     ShortDate=$(date +"%m/%d@%R" -d @${NixDate[$i]})
@@ -323,11 +323,11 @@ while true; do
                         ShortDate=$(date +"%m/%d@%R" -d @${NixDate[$i]})
                         printf "%-12s %-2s%-20s %-15s %-14s %-14s %-14s<br  />\n" "$ShortDate:" "${icon[$i]} " "${LongWeather[$i]}" "Temp:${temperature[$i]}°${degreeCharacter^^}" "Wind:${WindSpeed[$i]}$windunit" "Humidity:${Humidity[$i]}%" "Cloud Cover:${CloudCover[$i]}%"
                     fi
-                fi            
+                fi
                 i=$((i + 1))
             done
         fi
     if [ $dynamicUpdates -eq 0 ];then
         break
-    fi    
+    fi
 done
