@@ -287,14 +287,14 @@ while true; do
 
     if [ "$Inline" = "true" ]; then
         if [ "$colors" = "true" ]; then
-            bob=$(echo "$ShortWeather $temperature°${degreeCharacter^^}")
+            bob=$(echo "$ShortWeather ${temperature%\.*}°${degreeCharacter^^}")
             if [ "$FeelsLike" = "1" ]; then
-                bob=$(echo "$bob/$FeelsLikeTemp°${degreeCharacter^^}")
+                bob=$(echo "$bob/${FeelsLikeTemp%\.*}°${degreeCharacter^^}")
             fi
         else
-            bob=$(echo "$ShortWeather $temperature°${degreeCharacter^^}")
+            bob=$(echo "$ShortWeather ${temperature%\.*}°${degreeCharacter^^}")
             if [ "$FeelsLike" = "1" ]; then
-                bob=$(echo "$bob/$FeelsLikeTemp°${degreeCharacter^^}")
+                bob=$(echo "$bob/${FeelsLikeTemp%\.*}°${degreeCharacter^^}")
             fi
 
         fi
