@@ -1,6 +1,25 @@
 #!/bin/bash
 
 # TODO: Add in sunrise/sunset calcuations
+#Derived from https://gist.githubusercontent.com/elucify/c7ccfee9f13b42f11f81/raw/9f27e072aadc4df6f84d515309c82585a8a13d8e/gistfile1.txt
+
+RESTORE=$(echo -en '\033[0m')
+RED=$(echo -en '\033[00;31m')
+GREEN=$(echo -en '\033[00;32m')
+YELLOW=$(echo -en '\033[00;33m')
+BLUE=$(echo -en '\033[00;34m')
+MAGENTA=$(echo -en '\033[00;35m')
+PURPLE=$(echo -en '\033[00;35m')
+CYAN=$(echo -en '\033[00;36m')
+LGRAY=$(echo -en '\033[00;37m')
+LRED=$(echo -en '\033[01;31m')
+LGREEN=$(echo -en '\033[01;32m')
+LYELLOW=$(echo -en '\033[01;33m')
+LBLUE=$(echo -en '\033[01;34m')
+LMAGENTA=$(echo -en '\033[01;35m')
+LPURPLE=$(echo -en '\033[01;35m')
+LCYAN=$(echo -en '\033[01;36m')
+WHITE=$(echo -en '\033[01;37m')
 
 ########################################################################
 # Setting Defaults
@@ -8,46 +27,33 @@
 
 apiKey=""
 defaultLocation=""
-OpenBox="False"
-Conky="False"
-Terminal="False"
-HTML="False"
+Inline="false"
+Terminal="false"
 degreeCharacter="c"
 data=0
 lastUpdateTime=0
 FeelsLike=0
 dynamicUpdates=0
-UseIcons="True"
-colors="False"
+UseIcons="true"
+colors="false"
 
 ########################################################################
 # Reading in rc
 ########################################################################
-ConfigFile="$HOME/.config/weather_sh.rc"
+ConfigFile="$HOME/.config/weather_sh.json"
 
-if [ "$1" == "-r" ];then
+if [ "$1" == "-r" ]; then
     shift
     ConfigFile="$1"
     shift
 fi
 
-if [ -f "$ConfigFile" ];then
-    readarray -t line < "$ConfigFile"
-    apiKey=${line[0]}
-    defaultLocation=${line[1]}
-    degreeCharacter=${line[2]}
-    UseIcons=${line[3]}
-    temp=${line[4]}
-    if [ "$temp" = "True" ];then
-        if [ -f "$HOME/.bashcolors" ];then
-            source "$HOME/.bashcolors"
-            colors="True"
-        else
-            colors=""
-        fi
-    else
-        colors=""
-    fi
+if [ -f "$ConfigFile" ]; then
+    apiKey=$(jq -r '.apiKey' "$ConfigFile")
+    defaultLocation=$(jq -r '.cityId' "$ConfigFile")
+    degreeCharacter=$(jq -r '.degreeUnit' "$ConfigFile")
+    UseIcons=$(jq -r '.icons' "$ConfigFile")
+    colors=$(jq -r '.colors' "$ConfigFile")
 fi
 
 ########################################################################
@@ -66,39 +72,31 @@ option="$1"
     shift ;;
     -d) dynamicUpdates=1
     shift ;;
-    -t) Terminal="True"
+    -t) Terminal="true"
     shift ;;
-    -h) HTML="True"
-    shift ;;
-    -o) OpenBox="True"
-    shift ;;
-    -y) Conky="True"
+    -y) Inline="true"
     shift ;;
     -f) degreeCharacter="f"
     shift ;;
-    -n) UseIcons="False"
+    -n) UseIcons="false"
     shift ;;
     -p) CachePath="$2"
     shift
     shift ;;
-    -c)
-        if [ -f "$HOME/.bashcolors" ];then
-            source "$HOME/.bashcolors"
-            colors="True"
-        fi
+    -c) colors="true"
     shift ;;
     esac
 done
 
-if [ -z $apiKey ];then
+if [ -z $apiKey ]; then
     echo "No API Key specified in rc, script, or command line."
     exit
 fi
 
 #Is it City ID or a string?
 case $defaultLocation in
-    ''|*[!0-9]*) CityID="False" ;;
-    *) CityID="True" ;;
+    ''|*[!0-9]*) CityID="false" ;;
+    *) CityID="true" ;;
 esac
 
 
@@ -106,15 +104,15 @@ esac
 # Do we need a new datafile? If so, get it.
 ########################################################################
 
-if [ -z "${CachePath}" ];then
+if [ -z "${CachePath}" ]; then
     dataPath="/tmp/fore-$defaultLocation.json"
 else
     dataPath="${CachePath}/fore-$defaultLocation.json"
 fi
 
-if [ ! -e $dataPath ];then
+if [ ! -e $dataPath ]; then
     touch $dataPath
-    if [ "$CityID" = "True" ];then
+    if [ "$CityID" = "true" ]; then
         data=$(curl -s "http://api.openweathermap.org/data/2.5/forecast?id=$defaultLocation&units=metric&appid=$apiKey")
     else
         data=$(curl -s "http://api.openweathermap.org/data/2.5/forecast?q=$defaultLocation&units=metric&appid=$apiKey")
@@ -128,7 +126,7 @@ fi
     check=$(echo "$data" | grep -c -e '"cod":"40')
     check2=$(echo "$data" | grep -c -e '"cod":"30')
     sum=$(( $check + $check2 ))
-    if [ $sum -gt 0 ];then
+    if [ $sum -gt 0 ]; then
         exit 99
     fi
 
@@ -136,15 +134,15 @@ lastUpdateTime=$(($(date +%s) -600))
 
 while true; do
     lastfileupdate=$(date -r $dataPath +%s)
-    if [ $(($(date +%s)-$lastfileupdate)) -ge 600 ];then
-        if [ "$CityID" = "True" ];then
+    if [ $(($(date +%s)-$lastfileupdate)) -ge 600 ]; then
+        if [ "$CityID" = "true" ]; then
             data=$(curl -s "http://api.openweathermap.org/data/2.5/forecast?id=$defaultLocation&units=metric&appid=$apiKey")
         else
             data=$(curl -s "http://api.openweathermap.org/data/2.5/forecast?q=$defaultLocation&units=metric&appid=$apiKey")
         fi
         echo $data > $dataPath
     else
-        if [ "$Conky" != "True" ];then
+        if [ "$Inline" != "true" ]; then
             echo "Cache age: $(($(date +%s)-$lastfileupdate)) seconds."
         fi
     fi
@@ -169,7 +167,7 @@ while true; do
             ####################################################################
             # Current conditions (and icon)
             ####################################################################
-            if [ "$UseIcons" = "True" ];then
+            if [ "$UseIcons" = "true" ]; then
                 icons[$i]=$(echo $data | jq -r .list[$i].weather[] | jq -r .icon | tr '\n' ' ')
                 iconval=${icons[$i]%?}
                 case $iconval in
@@ -222,15 +220,11 @@ while true; do
     NowHour=$(date +"%-H")
     NowLow=$((NowHour + 1))
     NowHigh=$((NowHour - 1))
-    if [ "$OpenBox" = "False" ];then
-        if [ "$HTML" = "False" ];then
-            if [ "$Conky" = "False" ];then
-                Terminal="True"
-            fi
-        fi
+    if [ "$Inline" = "false" ]; then
+        Terminal="true"
     fi
-    if [ "$Conky" = "True" ]; then
-        if [ "$colors" = "True" ]; then
+    if [ "$Inline" = "true" ]; then
+        if [ "$colors" = "true" ]; then
             let i=0
             bob=""
             while [ $i -lt 5 ]; do
@@ -258,8 +252,8 @@ while true; do
         #bob
         echo "$bob"
     fi
-    if [ "$Terminal" = "True" ];then
-        if [ "$colors" = "True" ]; then
+    if [ "$Terminal" = "true" ]; then
+        if [ "$colors" = "true" ]; then
             echo "Forecast for $Station as of: ${YELLOW}$AsOf${RESTORE} "
         else
             echo "Forecast for $Station as of: $AsOf "
@@ -269,7 +263,7 @@ while true; do
             CastDate=$(date +"%s" -d @${NixDate[$i]})
             if [ $CastDate -le $TomorrowDate ]; then
                 ShortDate=$(date +"%m/%d@%R" -d @${NixDate[$i]})
-                if [ "$colors" = "True" ]; then
+                if [ "$colors" = "true" ]; then
                     printf "${YELLOW}%-11s${RESTORE}: ${CYAN}%-2s%-16s${RESTORE} Temp:${CYAN}%-6s${RESTORE} Wind:${MAGENTA}%-6s${RESTORE} Humidity:${GREEN}%-4s${RESTORE} Clouds:${GREEN}%-4s${RESTORE}\n" "$ShortDate" "${icon[$i]} " "${LongWeather[$i]}" "${temperature[$i]}°${degreeCharacter^^}" "${WindSpeed[$i]}$windunit" "${Humidity[$i]}%" "${CloudCover[$i]}%"
                 else
                     printf "%-12s %-2s%-20s %-15s %-14s %-14s %-14s\n" "$ShortDate:" "${icon[$i]} " "${LongWeather[$i]}" "Temp:${temperature[$i]}°${degreeCharacter^^}" "Wind:${WindSpeed[$i]}$windunit" "Humidity:${Humidity[$i]}%" "Cloud Cover:${CloudCover[$i]}%"
@@ -278,7 +272,7 @@ while true; do
                 CastHour=$(date +"%-H" -d @${NixDate[$i]})
                 if [ "$CastHour" -ge "$NowHigh" ] && [ "$CastHour" -le "$NowLow" ]; then
                     ShortDate=$(date +"%m/%d@%R" -d @${NixDate[$i]})
-                    if [ "$colors" = "True" ]; then
+                    if [ "$colors" = "true" ]; then
                         printf "${RED}%-11s${RESTORE}: ${CYAN}%-2s%-16s${RESTORE} Temp:${CYAN}%-6s${RESTORE} Wind:${MAGENTA}%-6s${RESTORE} Humidity:${GREEN}%-4s${RESTORE} Clouds:${GREEN}%-4s${RESTORE}\n" "$ShortDate" "${icon[$i]} " "${LongWeather[$i]}" "${temperature[$i]}°${degreeCharacter^^}" "${WindSpeed[$i]}$windunit" "${Humidity[$i]}%" "${CloudCover[$i]}%"
                     else
                         printf "%-12s %-2s%-20s %-15s %-14s %-14s %-14s\n" "$ShortDate:" "${icon[$i]} " "${LongWeather[$i]}" "Temp:${temperature[$i]}°${degreeCharacter^^}" "Wind:${WindSpeed[$i]}$windunit" "Humidity:${Humidity[$i]}%" "Cloud Cover:${CloudCover[$i]}%"
@@ -288,7 +282,7 @@ while true; do
             i=$((i + 1))
         done
         fi
-        if [ "$OpenBox" = "True" ]; then
+        if [ "$OpenBox" = "true" ]; then
             echo '<openbox_pipe_menu>'
             echo '<separator label="Forecast" />'
             printf '<item label="Forecast for %s as of %s" />\n' "$Station" "$AsOf"
@@ -309,7 +303,7 @@ while true; do
             done
             echo '</openbox_pipe_menu>'
         fi
-        if [ "$HTML" = "True" ];then
+        if [ "$HTML" = "true" ]; then
             echo "Forecast for $Station as of: $AsOf  <br  />"
             let i=0
             while [ $i -lt 40 ]; do
@@ -327,7 +321,7 @@ while true; do
                 i=$((i + 1))
             done
         fi
-    if [ $dynamicUpdates -eq 0 ];then
+    if [ $dynamicUpdates -eq 0 ]; then
         break
     fi
 done
